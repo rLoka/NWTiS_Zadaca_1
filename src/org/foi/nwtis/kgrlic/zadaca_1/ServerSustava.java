@@ -8,6 +8,7 @@ package org.foi.nwtis.kgrlic.zadaca_1;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -24,73 +25,100 @@ import org.foi.nwtis.kgrlic.konfiguracije.NemaKonfiguracije;
 public class ServerSustava {
 
     /**
-     * @param args the command line arguments
+     * Glavna metoda klase ServerSustava - pokreće server.
+     *
+     * @param args argumenti pri pozivu programa u obliku niza stringova
      */
     public static void main(String[] args) {
-        //-konf datoteka(.txt | .xml) [-load]
-        String sintaksa = "^-konf ([^\\s]+\\.(?i))(txt|xml|bin)( +-load)?$";
 
-        StringBuilder sb = new StringBuilder();
-        for (String arg : args) {
-            sb.append(arg).append(" ");
-        }
-        String p = sb.toString().trim();
-        Pattern pattern = Pattern.compile(sintaksa);
-        Matcher m = pattern.matcher(p);
-        boolean status = m.matches();
-        if (status) {
-            int poc = 0;
-            int kraj = m.groupCount();
-            for (int i = poc; i <= kraj; i++) {
-                System.out.println(i + ". " + m.group(i));
+        Matcher matcher = ServerSustava.provjeriUlazneParametre(args);
+
+        if (matcher.matches()) {
+
+            int kraj = matcher.groupCount();
+            for (int i = 0; i <= kraj; i++) {
+                System.out.println(i + ". " + matcher.group(i));
             }
-            
-            String nazivDatoteke = m.group(1) + m.group(2);
+
+            String nazivDatoteke = matcher.group(1) + matcher.group(2);
             boolean trebaUcitatiEvidenciju = false;
-            if(m.group(3) != null){
+            if (matcher.group(3) != null) {
                 trebaUcitatiEvidenciju = true;
             }
-            
+
             ServerSustava server = new ServerSustava();
-            server.pokreniServer(nazivDatoteke,trebaUcitatiEvidenciju);
-            
+            server.pokreniServer(nazivDatoteke, trebaUcitatiEvidenciju);
+
         } else {
-            System.out.println("Ne odgovara!");
+            System.out.println("Prosljeđeni argumenti ne odgovaru predviđenim načinima poziva!");
         }
     }
 
+    /**
+     * Metoda provjerava da li su argumenti valjani, tj. vraća Matcher objekt
+     * koje koriste ostale metode za sekvencioniranje argumenata.
+     *
+     *
+     * @param args argumenti u obliku stringa
+     */
+    private static Matcher provjeriUlazneParametre(String[] args) {
+
+        String sintaksa = "^-konf ([^\\s]+\\.(?i))(txt|xml|bin)( +-load)?$";
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (String arg : args) {
+            stringBuilder.append(arg).append(" ");
+        }
+
+        String ulazniString = stringBuilder.toString().trim();
+        Pattern pattern = Pattern.compile(sintaksa);
+        Matcher matcher = pattern.matcher(ulazniString);
+        return matcher;
+    }
+
     private void pokreniServer(String nazivDatoteke, boolean trebaUcitatiEvidenciju) {
-        //TODO kreirati kolekciju u kojoj će se spremati aktivne dretve
+        //TODO kreirati kolekciju u kojoj će serijalizatorEvidencije spremati aktivne dretve
+        ArrayList<RadnaDretva> listaAktivnihRadnihDretvi = listaAktivnihRadnihDretvi = new ArrayList<>();
+
         try {
-            Konfiguracija konfig = KonfiguracijaApstraktna.preuzmiKonfiguraciju(nazivDatoteke);
+            Konfiguracija konfiguracija = KonfiguracijaApstraktna.preuzmiKonfiguraciju(nazivDatoteke);
+
+            int port = Integer.parseInt(konfiguracija.dajPostavku("port"));
+            int maksBrojRadnihDretvi = Integer.parseInt(konfiguracija.dajPostavku("maksBrojRadnihDretvi"));
+
+            NadzorDretvi nadzorDretvi = new NadzorDretvi(konfiguracija);
+            nadzorDretvi.start();
             
-            int port = Integer.parseInt(konfig.dajPostavku("port"));
-            
-            NadzorDretvi nd = new NadzorDretvi(konfig);
-            nd.start();
-            RezervnaDretva rezervnaDretva = new RezervnaDretva(konfig);
+            RezervnaDretva rezervnaDretva = new RezervnaDretva(konfiguracija);
             rezervnaDretva.start();
-            ProvjeraAdresa pa = new ProvjeraAdresa(konfig);
-            pa.start();
-            SerijalizatorEvidencije se = new SerijalizatorEvidencije(konfig);
-            se.start();
             
+            ProvjeraAdresa provjeraAdresa = new ProvjeraAdresa(konfiguracija);
+            provjeraAdresa.start();
+            
+            SerijalizatorEvidencije serijalizatorEvidencije = new SerijalizatorEvidencije(konfiguracija);
+            serijalizatorEvidencije.start();
+
             ServerSocket serverSocket = new ServerSocket(port);
-            
-            while (true) {                
+
+            while (true) {
                 Socket socket = serverSocket.accept();
-                RadnaDretva rd = new RadnaDretva(socket);
-                //TODO dodaj dretvu u kolekciju aktivnih radnih dretvi
-                rd.start();
-                
+
+                //TODO dodaj dretvu u kolekciju aktivnih radnih dretvi               
+                if (listaAktivnihRadnihDretvi.size() >= maksBrojRadnihDretvi) {
+                    System.out.println("Previše radnih dretvi! Pokrećem rezervnu dretvu.");
+                    rezervnaDretva.obradiKorisnika(socket);
+                } else {
+                    RadnaDretva radnaDretva = new RadnaDretva(socket, listaAktivnihRadnihDretvi);
+                    listaAktivnihRadnihDretvi.add(radnaDretva);
+                    radnaDretva.start();
+                }
+
                 //TODO treba provjeriti ima li "mjesta" za novu radnu dretvu
             }
-            
+
         } catch (NemaKonfiguracije | NeispravnaKonfiguracija | IOException ex) {
             Logger.getLogger(ServerSustava.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-
 
 }

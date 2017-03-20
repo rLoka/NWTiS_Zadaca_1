@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -20,11 +21,13 @@ import java.util.regex.Pattern;
  */
 public class RadnaDretva extends Thread {
 
-    private Socket s;
+    private final Socket socket;
+    private final ArrayList<RadnaDretva> listaAktivnihRadnihDretvi;
     //TODO varijabla za vrijeme početka rada dretve
 
-    RadnaDretva(Socket socket) {
-        this.s = socket;
+    RadnaDretva(Socket socket, ArrayList<RadnaDretva> listaAktivnihRadnihDretvi) {
+        this.socket = socket;
+        this.listaAktivnihRadnihDretvi = listaAktivnihRadnihDretvi;
     }
 
     @Override
@@ -42,39 +45,41 @@ public class RadnaDretva extends Thread {
         String sintaksa_korisnik_2 = "USER ([^\\s]+); TEST ([^\\s]+);";
         String sintaksa_korisnik_3 = "USER ([^\\s]+); WAIT ([^\\s]+);";
 
-        InputStream is = null;
-        OutputStream os = null;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
 
         try {
-            is = s.getInputStream();
-            os = s.getOutputStream();
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
 
-            StringBuffer sb = new StringBuffer();
+            StringBuffer stringBuffer = new StringBuffer();
+            
             while (true) {
-                int znak = is.read();
+                int znak = inputStream.read();
                 if (znak == -1) {
                     break;
                 }
-                sb.append((char) znak);
+                stringBuffer.append((char) znak);
             }
-            System.out.println("Primljena naredba: " + sb);
+            
+            System.out.println("Primljena naredba: " + stringBuffer);
 
             //TODO provjeri ispravnost pripremljenog zahtjeva
-            Pattern p = Pattern.compile(sintaksa_admin);
-            Matcher m = p.matcher(sb);
-            boolean status = m.matches();
+            Pattern pattern = Pattern.compile(sintaksa_admin);
+            Matcher matcher = pattern.matcher(stringBuffer);
+            boolean status = matcher.matches();
             if (status) {
                 //TODO dobršiti za admina
             } else {
-                p = Pattern.compile(sintaksa_korisnik_1);
-                m = p.matcher(sb);
-                status = m.matches();
+                pattern = Pattern.compile(sintaksa_korisnik_1);
+                matcher = pattern.matcher(stringBuffer);
+                status = matcher.matches();
                 if (status) {
                     //TODO dovršiti za korisnika 1. slučaj
                 } else {
-                    p = Pattern.compile(sintaksa_korisnik_2);
-                    m = p.matcher(sb);
-                    status = m.matches();
+                    pattern = Pattern.compile(sintaksa_korisnik_2);
+                    matcher = pattern.matcher(stringBuffer);
+                    status = matcher.matches();
                     if (status) {
                         //TODO dovršiti za korisnika 2. slučaj
                     } else {
@@ -83,19 +88,19 @@ public class RadnaDretva extends Thread {
                 }
             }
 
-            os.write("OK;".getBytes());
-            os.flush();
+            outputStream.write("OK;".getBytes());
+            outputStream.flush();
         } catch (IOException ex) {
             Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                if (is != null) {
-                    is.close();
+                if (inputStream != null) {
+                    inputStream.close();
                 }
-                if (os != null) {
-                    os.close();
+                if (outputStream != null) {
+                    outputStream.close();
                 }
-                s.close();
+                socket.close();
             } catch (IOException ex) {
                 Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
             }
