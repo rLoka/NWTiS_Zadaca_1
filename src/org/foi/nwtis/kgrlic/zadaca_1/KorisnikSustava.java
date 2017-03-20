@@ -70,7 +70,7 @@ public class KorisnikSustava {
             is = s.getInputStream();
             os = s.getOutputStream();
 
-            String zahtjev = "USER pero; PASSWD 123456; PAUSE; ";
+            String zahtjev = "USER pero; PASSWDD 123456; PAUSE;";
             os.write(zahtjev.getBytes());
             os.flush();
             s.shutdownOutput();

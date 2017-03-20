@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -23,11 +25,23 @@ public class RadnaDretva extends Thread {
 
     private final Socket socket;
     private final ArrayList<RadnaDretva> listaAktivnihRadnihDretvi;
+    private final ArrayList<String> listaNaredba;
     //TODO varijabla za vrijeme početka rada dretve
 
-    RadnaDretva(Socket socket, ArrayList<RadnaDretva> listaAktivnihRadnihDretvi) {
+    RadnaDretva(Socket socket, ArrayList<RadnaDretva> listaAktivnihRadnihDretvi, short redniBrojDretve) {
+        //Postavljanje imena dretve
+        //super("kgrlic-" + Short.toUnsignedInt(redniBrojDretve));
+        Thread.currentThread().setName("kgrlic-" + Short.toUnsignedInt(redniBrojDretve));
+        System.out.println("Pokrenuta dretva: " + Thread.currentThread().getName());
+        
         this.socket = socket;
         this.listaAktivnihRadnihDretvi = listaAktivnihRadnihDretvi;
+        this.listaNaredba = new ArrayList<>();
+        
+        this.listaNaredba.add("^USER ([^\\s]+); (PASSWD) ([^\\s]+); (PAUSE|STOP|START|STAT);$");
+        this.listaNaredba.add("^USER ([^\\s]+); (ADD) ([^\\s]+);$");
+        this.listaNaredba.add("^USER ([^\\s]+); (TEST) ([^\\s]+);$");
+        this.listaNaredba.add("^USER ([^\\s]+); (WAIT) ([^\\s]+);$");
     }
 
     @Override
@@ -40,11 +54,6 @@ public class RadnaDretva extends Thread {
         //TODO preuzeti trenutno vrijeme u milisekundama 
         System.out.println(this.getClass());
 
-        String sintaksa_admin = "^USER ([^\\s]+); PASSWD ([^\\s]+); (PAUSE|STOP|START|STAT);$";
-        String sintaksa_korisnik_1 = "USER ([^\\s]+); ADD ([^\\s]+);";
-        String sintaksa_korisnik_2 = "USER ([^\\s]+); TEST ([^\\s]+);";
-        String sintaksa_korisnik_3 = "USER ([^\\s]+); WAIT ([^\\s]+);";
-
         InputStream inputStream = null;
         OutputStream outputStream = null;
 
@@ -53,7 +62,7 @@ public class RadnaDretva extends Thread {
             outputStream = socket.getOutputStream();
 
             StringBuffer stringBuffer = new StringBuffer();
-            
+
             while (true) {
                 int znak = inputStream.read();
                 if (znak == -1) {
@@ -61,35 +70,32 @@ public class RadnaDretva extends Thread {
                 }
                 stringBuffer.append((char) znak);
             }
-            
-            System.out.println("Primljena naredba: " + stringBuffer);
 
-            //TODO provjeri ispravnost pripremljenog zahtjeva
-            Pattern pattern = Pattern.compile(sintaksa_admin);
-            Matcher matcher = pattern.matcher(stringBuffer);
-            boolean status = matcher.matches();
-            if (status) {
-                //TODO dobršiti za admina
-            } else {
-                pattern = Pattern.compile(sintaksa_korisnik_1);
-                matcher = pattern.matcher(stringBuffer);
-                status = matcher.matches();
-                if (status) {
-                    //TODO dovršiti za korisnika 1. slučaj
-                } else {
-                    pattern = Pattern.compile(sintaksa_korisnik_2);
-                    matcher = pattern.matcher(stringBuffer);
-                    status = matcher.matches();
-                    if (status) {
-                        //TODO dovršiti za korisnika 2. slučaj
-                    } else {
-                        //TODO i tako za sve ostale slučajve
-                    }
-                }
+            System.out.println("Primljena naredba: " + stringBuffer);
+            
+            Matcher zaprimljeneNaredbe = this.identificirajNaredbu(stringBuffer);
+                        
+            if (zaprimljeneNaredbe == null){
+                outputStream.write("ERROR 90; Nevaljana naredba.".getBytes());
             }
 
-            outputStream.write("OK;".getBytes());
+            switch (zaprimljeneNaredbe.group(2)) {
+                case "PASSWD":
+                    this.izvrsiAdminNaredbu(zaprimljeneNaredbe, outputStream);
+                    break;
+                case "ADD":
+                    outputStream.write("OK; ADD".getBytes());
+                    break;
+                case "TEST":
+                    outputStream.write("OK; TEST".getBytes());
+                    break;
+                case "WAIT":
+                    outputStream.write("OK; WAIT".getBytes());
+                    break;
+            }            
+            
             outputStream.flush();
+            
         } catch (IOException ex) {
             Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -116,4 +122,49 @@ public class RadnaDretva extends Thread {
         super.start(); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public Matcher identificirajNaredbu(StringBuffer korisnickaNaredba) {
+
+        for (String naredba : this.listaNaredba) {
+            Pattern pattern = Pattern.compile(naredba);
+            Matcher matcher = pattern.matcher(korisnickaNaredba);
+
+            if (matcher.matches()) {
+                return matcher;
+            }
+        }
+
+        return null;
+    }
+    
+    public void izvrsiAdminNaredbu(Matcher zaprimljeneNaredbe, OutputStream outputStream) throws IOException{
+        switch (zaprimljeneNaredbe.group(4)) {
+                case "PAUSE":
+                    outputStream.write("OK; PAUSE".getBytes());
+                    break;
+                case "START":
+                    outputStream.write("OK; START".getBytes());
+                    break;
+                case "STOP":
+                    outputStream.write("OK; STOP".getBytes());
+                    break;
+                case "STAT":
+                    outputStream.write("OK; STAT".getBytes());
+                    break;
+                default:
+                    outputStream.write("ERROR 90; Nevaljana naredba.".getBytes());
+            }            
+    
+    }
+    
+    public void izvrsiKlijentAddNaredbu(Matcher matcher, OutputStream outputStream) throws IOException{
+        outputStream.write("OK; ADD".getBytes());
+    }
+    
+    public void izvrsiKlijentTestNaredbu(Matcher matcher, OutputStream outputStream) throws IOException{
+        outputStream.write("OK; TEST".getBytes());
+    }
+    
+    public void izvrsiKlijentWaitNaredbu(Matcher matcher, OutputStream outputStream) throws IOException{
+        outputStream.write("OK; WAIT".getBytes());
+    }
 }

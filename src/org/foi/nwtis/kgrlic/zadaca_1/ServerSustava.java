@@ -85,16 +85,17 @@ public class ServerSustava {
 
             int port = Integer.parseInt(konfiguracija.dajPostavku("port"));
             int maksBrojRadnihDretvi = Integer.parseInt(konfiguracija.dajPostavku("maksBrojRadnihDretvi"));
+            short redniBrojDretve = 0;
 
             NadzorDretvi nadzorDretvi = new NadzorDretvi(konfiguracija);
             nadzorDretvi.start();
-            
+
             RezervnaDretva rezervnaDretva = new RezervnaDretva(konfiguracija);
             rezervnaDretva.start();
-            
+
             ProvjeraAdresa provjeraAdresa = new ProvjeraAdresa(konfiguracija);
             provjeraAdresa.start();
-            
+
             SerijalizatorEvidencije serijalizatorEvidencije = new SerijalizatorEvidencije(konfiguracija);
             serijalizatorEvidencije.start();
 
@@ -102,22 +103,22 @@ public class ServerSustava {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-
-                //TODO dodaj dretvu u kolekciju aktivnih radnih dretvi               
+           
                 if (listaAktivnihRadnihDretvi.size() >= maksBrojRadnihDretvi) {
                     System.out.println("Previše radnih dretvi! Pokrećem rezervnu dretvu.");
                     rezervnaDretva.obradiKorisnika(socket);
                 } else {
-                    RadnaDretva radnaDretva = new RadnaDretva(socket, listaAktivnihRadnihDretvi);
+                    redniBrojDretve++;
+                    RadnaDretva radnaDretva = new RadnaDretva(socket, listaAktivnihRadnihDretvi, redniBrojDretve);
                     listaAktivnihRadnihDretvi.add(radnaDretva);
                     radnaDretva.start();
                 }
-
-                //TODO treba provjeriti ima li "mjesta" za novu radnu dretvu
             }
 
         } catch (NemaKonfiguracije | NeispravnaKonfiguracija | IOException ex) {
             Logger.getLogger(ServerSustava.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            System.out.println("Neispravna ili nepostojeća konfiguracijska datoteka! Gasim server ...");
         }
     }
 
