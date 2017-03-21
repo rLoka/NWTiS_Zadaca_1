@@ -87,7 +87,7 @@ public class ServerSustava {
             int maksBrojRadnihDretvi = Integer.parseInt(konfiguracija.dajPostavku("maksBrojRadnihDretvi"));
             short redniBrojDretve = 0;
 
-            NadzorDretvi nadzorDretvi = new NadzorDretvi(konfiguracija);
+            NadzorDretvi nadzorDretvi = new NadzorDretvi(konfiguracija, listaAktivnihRadnihDretvi);
             nadzorDretvi.start();
 
             RezervnaDretva rezervnaDretva = new RezervnaDretva(konfiguracija);
@@ -103,7 +103,7 @@ public class ServerSustava {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-           
+
                 if (listaAktivnihRadnihDretvi.size() >= maksBrojRadnihDretvi) {
                     System.out.println("Previše radnih dretvi! Pokrećem rezervnu dretvu.");
                     rezervnaDretva.obradiKorisnika(socket);
@@ -117,7 +117,6 @@ public class ServerSustava {
 
         } catch (NemaKonfiguracije | NeispravnaKonfiguracija | IOException ex) {
             Logger.getLogger(ServerSustava.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
             System.out.println("Neispravna ili nepostojeća konfiguracijska datoteka! Gasim server ...");
         }
     }

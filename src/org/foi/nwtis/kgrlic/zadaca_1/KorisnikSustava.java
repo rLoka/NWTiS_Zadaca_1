@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -29,78 +31,109 @@ public class KorisnikSustava {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        //-admin -server [ipadresa | adresa] -port port -u korisnik -p lozinka [-pause | -start | -stop | -stat ]
-        //TODO dovrši ostale paremetre
-                          //-admin -server localhost -port 8000
-        String sintaksa = "^-admin -server ([^\\s]+) -port ([\\d]{4})$";
 
-        StringBuilder sb = new StringBuilder();
+        ArrayList<String> listaNaredbi = new ArrayList<>();
+
+        listaNaredbi.add("^-(admin) -server ([^\\s]+) -port ([\\d]{4}) -u ([^\\s]+) -p ([^\\s]+) -((pause)|(start)|(stop)|(stat))$");
+        listaNaredbi.add("^-(user) -s ([^\\s]+) -port ([\\d]{4}) -u ([^\\s]+) (-a|-t|-w) ([^\\s]+)|([\\d]{3})$");
+        listaNaredbi.add("^-(prikaz) -s ([^\\s]+)$");
+
+        StringBuilder stringBuilder = new StringBuilder();
         for (String arg : args) {
-            sb.append(arg).append(" ");
+            stringBuilder.append(arg).append(" ");
         }
-        String p = sb.toString().trim();
-        Pattern pattern = Pattern.compile(sintaksa);
-        Matcher m = pattern.matcher(p);
-        boolean status = m.matches();
-        if (status) {
-            int poc = 0;
-            int kraj = m.groupCount();
-            for (int i = poc; i <= kraj; i++) {
-                System.out.println(i + ". " + m.group(i));
-            }
-            
-            String nazivServera = m.group(1);
-            int port = Integer.parseInt(m.group(2));
-            
+
+        Matcher matcher = KorisnikSustava.identificirajNaredbu(stringBuilder.toString().trim(), listaNaredbi);
+
+        if (matcher.matches()) {
+
             KorisnikSustava korisnikSustava = new KorisnikSustava();
-            korisnikSustava.pokreniKorisnika(nazivServera,port);
-            
+
+            switch (matcher.group(1)) {
+                case "admin":
+                    korisnikSustava.izvrsiAdminNaredbu(matcher);
+                    break;
+                case "user":
+                    System.out.println("User!");
+                    break;
+                case "prikaz":
+                    System.out.println("Prikaz!");
+                    break;
+            }
+
         } else {
-            System.out.println("Ne odgovara regex!");
+            System.out.println("Proslijeđeni parametri ne odgovaraju! Gasim program ...");
         }
     }
 
-    private void pokreniKorisnika(String nazivServera, int port) {
-        InputStream is = null;
-        OutputStream os = null;
-        Socket s = null;
-        
-        try {
-            s = new Socket(nazivServera, port);
-            is = s.getInputStream();
-            os = s.getOutputStream();
+    private static Matcher identificirajNaredbu(String korisnickaNaredba, ArrayList<String> listaNaredbi) {
 
-            String zahtjev = "USER pero; PASSWDD 123456; PAUSE;";
-            os.write(zahtjev.getBytes());
-            os.flush();
-            s.shutdownOutput();
-            
-            StringBuffer sb = new StringBuffer();
+        for (String naredba : listaNaredbi) {
+            Pattern pattern = Pattern.compile(naredba);
+            Matcher matcher = pattern.matcher(korisnickaNaredba);
+            if (matcher.matches()) {
+                for (int i = 0; i <= matcher.groupCount(); i++) {
+                    System.out.println(i + ". " + matcher.group(i));
+                }
+                return matcher;
+            }
+        }
+
+        return null;
+    }
+
+    private void izvrsiAdminNaredbu(Matcher matcher) {
+        String server = matcher.group(2);
+        int port = Integer.parseInt(matcher.group(3));
+        String korisnik = matcher.group(4);
+        String lozinka = matcher.group(5);
+        String naredba = matcher.group(6);
+
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        Socket socket = null;
+
+        try {
+            socket = new Socket(server, port);
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+
+            String zahtjev = "USER " + korisnik + "; PASSWD " + lozinka + "; " + naredba.toUpperCase() + ";";
+            outputStream.write(zahtjev.getBytes());
+            outputStream.flush();
+            socket.shutdownOutput();
+
+            StringBuffer stringBuilder = new StringBuffer();
             while (true) {
-                int znak = is.read();
+                int znak = inputStream.read();
                 if (znak == -1) {
                     break;
                 }
-                sb.append((char) znak);
+                stringBuilder.append((char) znak);
             }
-            System.out.println("Primljeni  odgovor: " + sb);
+            System.out.println("Primljeni  odgovor: " + stringBuilder);
         } catch (IOException ex) {
             Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                if (is != null) {
-                    is.close();
+                if (inputStream != null) {
+                    inputStream.close();
                 }
-                if (os != null) {
-                    os.close();
+                if (outputStream != null) {
+                    outputStream.close();
                 }
-                s.close();
+                socket.close();
             } catch (IOException ex) {
                 Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
+    private void izvrsiKorisnikNaredbu() {
 
+    }
 
+    private void izvrsiPrikazNaredbu() {
+
+    }
 }
