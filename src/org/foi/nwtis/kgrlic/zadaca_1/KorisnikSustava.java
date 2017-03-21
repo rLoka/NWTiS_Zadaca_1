@@ -5,21 +5,9 @@
  */
 package org.foi.nwtis.kgrlic.zadaca_1;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.foi.nwtis.kgrlic.konfiguracije.Konfiguracija;
-import org.foi.nwtis.kgrlic.konfiguracije.KonfiguracijaApstraktna;
-import org.foi.nwtis.kgrlic.konfiguracije.NeispravnaKonfiguracija;
-import org.foi.nwtis.kgrlic.konfiguracije.NemaKonfiguracije;
 
 /**
  *
@@ -35,7 +23,7 @@ public class KorisnikSustava {
         ArrayList<String> listaNaredbi = new ArrayList<>();
 
         listaNaredbi.add("^-(admin) -server ([^\\s]+) -port ([\\d]{4}) -u ([^\\s]+) -p ([^\\s]+) -((pause)|(start)|(stop)|(stat))$");
-        listaNaredbi.add("^-(user) -s ([^\\s]+) -port ([\\d]{4}) -u ([^\\s]+) (-a|-t|-w) ([^\\s]+)|([\\d]{3})$");
+        listaNaredbi.add("^-(user) -s ([^\\s]+) -port ([\\d]{4}) -u ([^\\s]+) -(a|t|w) ([^\\s]+)|([\\d]{3})$");
         listaNaredbi.add("^-(prikaz) -s ([^\\s]+)$");
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -51,13 +39,16 @@ public class KorisnikSustava {
 
             switch (matcher.group(1)) {
                 case "admin":
-                    korisnikSustava.izvrsiAdminNaredbu(matcher);
+                    AdministratorSustava administratorSustava = new AdministratorSustava(matcher);
+                    administratorSustava.izvrsiAdminNaredbu();
                     break;
                 case "user":
-                    System.out.println("User!");
+                    KlijentSustava klijentSustava = new KlijentSustava(matcher);
+                    klijentSustava.izvrsiKlijentNaredbu();
                     break;
                 case "prikaz":
-                    System.out.println("Prikaz!");
+                    PregledSustava pregledSustava = new PregledSustava(matcher);
+                    pregledSustava.izvrsiPregledNaredbu();                    
                     break;
             }
 
@@ -80,60 +71,5 @@ public class KorisnikSustava {
         }
 
         return null;
-    }
-
-    private void izvrsiAdminNaredbu(Matcher matcher) {
-        String server = matcher.group(2);
-        int port = Integer.parseInt(matcher.group(3));
-        String korisnik = matcher.group(4);
-        String lozinka = matcher.group(5);
-        String naredba = matcher.group(6);
-
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
-        Socket socket = null;
-
-        try {
-            socket = new Socket(server, port);
-            inputStream = socket.getInputStream();
-            outputStream = socket.getOutputStream();
-
-            String zahtjev = "USER " + korisnik + "; PASSWD " + lozinka + "; " + naredba.toUpperCase() + ";";
-            outputStream.write(zahtjev.getBytes());
-            outputStream.flush();
-            socket.shutdownOutput();
-
-            StringBuffer stringBuilder = new StringBuffer();
-            while (true) {
-                int znak = inputStream.read();
-                if (znak == -1) {
-                    break;
-                }
-                stringBuilder.append((char) znak);
-            }
-            System.out.println("Primljeni  odgovor: " + stringBuilder);
-        } catch (IOException ex) {
-            Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-                socket.close();
-            } catch (IOException ex) {
-                Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-    private void izvrsiKorisnikNaredbu() {
-
-    }
-
-    private void izvrsiPrikazNaredbu() {
-
     }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-<comment>NWTiS dkermek</comment>
+<comment>NWTiS kgrlic</comment>
 <entry key="port">8000</entry>
 <entry key="intervalNadzorneDretve">100000</entry>
 <entry key="maksVrijemeRadneDretve">30000</entry>

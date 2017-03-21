@@ -15,10 +15,10 @@ import org.foi.nwtis.kgrlic.konfiguracije.Konfiguracija;
  */
 public class ProvjeraAdresa extends Thread{
 
-    Konfiguracija konf;
+    Konfiguracija konfiguracija;
     
-    public ProvjeraAdresa(Konfiguracija konf) {
-        this.konf = konf;
+    public ProvjeraAdresa(Konfiguracija konfiguracija) {
+        this.konfiguracija = konfiguracija;
     }
     
     @Override
@@ -28,7 +28,7 @@ public class ProvjeraAdresa extends Thread{
 
     @Override
     public void run() {
-        int trajanjeSpavanja = Integer.parseInt(konf.dajPostavku("intervalAdresneDretve"));
+        int trajanjeSpavanja = Integer.parseInt(konfiguracija.dajPostavku("intervalAdresneDretve"));
         
         while (true) {        
             System.out.println(this.getClass());

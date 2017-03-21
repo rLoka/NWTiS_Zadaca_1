@@ -22,8 +22,8 @@ public class RezervnaDretva extends Thread {
     Konfiguracija konfiguracija;
     Socket socket;
 
-    public RezervnaDretva(Konfiguracija konf) {
-        this.konfiguracija = konf;
+    public RezervnaDretva(Konfiguracija konfiguracija) {
+        this.konfiguracija = konfiguracija;
     }
 
     @Override
