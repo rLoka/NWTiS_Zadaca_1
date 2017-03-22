@@ -11,8 +11,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.foi.nwtis.kgrlic.konfiguracije.Konfiguracija;
 import org.foi.nwtis.kgrlic.konfiguracije.KonfiguracijaApstraktna;
 import org.foi.nwtis.kgrlic.konfiguracije.NeispravnaKonfiguracija;
@@ -30,19 +28,23 @@ public class ServerSustava {
      * @param args argumenti pri pozivu programa u obliku niza stringova
      */
     public static void main(String[] args) {
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        Validator validator = new Validator();
 
-        Matcher matcher = ServerSustava.provjeriUlazneParametre(args);
+        for (String arg : args) {
+            stringBuilder.append(arg).append(" ");
+        }
 
-        if (matcher.matches()) {
+        String ulazniString = stringBuilder.toString().trim();
 
-            int kraj = matcher.groupCount();
-            for (int i = 0; i <= kraj; i++) {
-                System.out.println(i + ". " + matcher.group(i));
-            }
-
-            String nazivDatoteke = matcher.group(1) + matcher.group(2);
+        if (validator.stringValjan(ulazniString, Validator.SERVER)) {
+            
+            ArrayList<String> argumenti = validator.grupe(ulazniString, Validator.SERVER);
+      
+            String nazivDatoteke = argumenti.get(1) + argumenti.get(2);
             boolean trebaUcitatiEvidenciju = false;
-            if (matcher.group(3) != null) {
+            if (argumenti.size() > 3) {
                 trebaUcitatiEvidenciju = true;
             }
 
@@ -52,28 +54,6 @@ public class ServerSustava {
         } else {
             System.out.println("Prosljeđeni argumenti ne odgovaru predviđenim načinima poziva!");
         }
-    }
-
-    /**
-     * Metoda provjerava da li su argumenti valjani, tj. vraća Matcher objekt
-     * koje koriste ostale metode za sekvencioniranje argumenata.
-     *
-     *
-     * @param args argumenti u obliku stringa
-     */
-    private static Matcher provjeriUlazneParametre(String[] args) {
-
-        String sintaksa = "^-konf ([^\\s]+\\.(?i))(txt|xml|bin)( +-load)?$";
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (String arg : args) {
-            stringBuilder.append(arg).append(" ");
-        }
-
-        String ulazniString = stringBuilder.toString().trim();
-        Pattern pattern = Pattern.compile(sintaksa);
-        Matcher matcher = pattern.matcher(ulazniString);
-        return matcher;
     }
 
     private void pokreniServer(String nazivDatoteke, boolean trebaUcitatiEvidenciju) {
