@@ -79,6 +79,7 @@ public class ServerSustava {
     private void pokreniServer(String nazivDatoteke, boolean trebaUcitatiEvidenciju) {
         //TODO kreirati kolekciju u kojoj će serijalizatorEvidencije spremati aktivne dretve
         ArrayList<RadnaDretva> listaAktivnihRadnihDretvi = listaAktivnihRadnihDretvi = new ArrayList<>();
+        ServerRuntimeKonfiguracija serverRuntimeKonfiguracija = ServerRuntimeKonfiguracija.getInstance();
 
         try {
             Konfiguracija konfiguracija = KonfiguracijaApstraktna.preuzmiKonfiguraciju(nazivDatoteke);

@@ -3,7 +3,7 @@
 <properties>
 <comment>NWTiS kgrlic</comment>
 <entry key="port">8000</entry>
-<entry key="intervalNadzorneDretve">100000</entry>
+<entry key="intervalNadzorneDretve">1000</entry>
 <entry key="maksVrijemeRadneDretve">30000</entry>
 <entry key="intervalAdresneDretve">20000</entry>
 <entry key="maksAdresa">10</entry>

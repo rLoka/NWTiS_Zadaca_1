@@ -39,16 +39,16 @@ public class NadzorDretvi extends Thread {
         while (true) {
             System.out.println(this.getClass());
             long trenutnoVrijeme = System.currentTimeMillis();
-            
+
             this.provjeriRadneDretve();
-            
+
             //TODO dovršite sami
             //TODO provjerite trajanje pojedine aktivne radne dretve iz kolekcije
             //TODO obrisati dretvu iz kolekcije aktivnih radnih dretvi ako traje više nego što smije
             long vrijemeZavrsetka = System.currentTimeMillis();
 
             try {
-                sleep(this.intervalNadzorneDretve - (vrijemeZavrsetka - trenutnoVrijeme));
+                sleep(Math.abs(this.intervalNadzorneDretve - (vrijemeZavrsetka - trenutnoVrijeme)));
             } catch (InterruptedException ex) {
                 Logger.getLogger(NadzorDretvi.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -61,15 +61,23 @@ public class NadzorDretvi extends Thread {
     public synchronized void start() {
         super.start();
     }
-    
-    private void provjeriRadneDretve(){
-        listaAktivnihRadnihDretvi.forEach((radnaDretva) -> {
+
+    private void provjeriRadneDretve() {
+        //Temp lista se koristi zbog java.util.ConcurrentModificationException
+        ArrayList<RadnaDretva> listaDretviKojeTrebaPrekinuti = new ArrayList();
+
+        this.listaAktivnihRadnihDretvi.forEach((radnaDretva) -> {
             String imeRadneDretve = radnaDretva.getName();
             Long vrijemeIzvodenja = radnaDretva.vrijemeIzvodenja();
             System.out.println("Dretva " + imeRadneDretve + " se izvodi već " + vrijemeIzvodenja + "ms.");
             if (vrijemeIzvodenja > this.maksVrijemeRadneDretve) {
-                radnaDretva.interrupt();
+                listaDretviKojeTrebaPrekinuti.add(radnaDretva);
             }
         });
+
+        listaDretviKojeTrebaPrekinuti.forEach((radnaDretva) -> {
+            radnaDretva.interrupt();
+        });
+        
     }
 }

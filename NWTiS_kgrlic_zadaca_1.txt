@@ -1,6 +1,6 @@
 #NWTIS konfiguracija
 port=8000
-intervalNadzorneDretve=100000
+intervalNadzorneDretve=1000
 maksVrijemeRadneDretve=30000
 intervalAdresneDretve=20000
 maksAdresa=10
