@@ -6,8 +6,6 @@
 package org.foi.nwtis.kgrlic.zadaca_1;
 
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -20,35 +18,29 @@ public class KorisnikSustava {
      */
     public static void main(String[] args) {
 
-        ArrayList<String> listaNaredbi = new ArrayList<>();
-
-        listaNaredbi.add("^-(admin) -server ([^\\s]+) -port ([\\d]{4}) -u ([^\\s]+) -p ([^\\s]+) -((pause)|(start)|(stop)|(stat))$");
-        listaNaredbi.add("^-(user) -s ([^\\s]+) -port ([\\d]{4}) -u ([^\\s]+) -(a|t|w) ([^\\s]+)|([\\d]{3})$");
-        listaNaredbi.add("^-(prikaz) -s ([^\\s]+)$");
-
         StringBuilder stringBuilder = new StringBuilder();
         for (String arg : args) {
             stringBuilder.append(arg).append(" ");
         }
 
-        Matcher matcher = KorisnikSustava.identificirajNaredbu(stringBuilder.toString().trim(), listaNaredbi);
+        ArrayList<String> naredba = KorisnikSustava.identificirajNaredbu(stringBuilder.toString().trim());
 
-        if (matcher.matches()) {
+        if (naredba != null) {
 
             KorisnikSustava korisnikSustava = new KorisnikSustava();
 
-            switch (matcher.group(1)) {
+            switch (naredba.get(1)) {
                 case "admin":
-                    AdministratorSustava administratorSustava = new AdministratorSustava(matcher);
+                    AdministratorSustava administratorSustava = new AdministratorSustava(naredba);
                     administratorSustava.izvrsiAdminNaredbu();
                     break;
-                case "user":
-                    KlijentSustava klijentSustava = new KlijentSustava(matcher);
+                case "korisnik":
+                    KlijentSustava klijentSustava = new KlijentSustava(naredba);
                     klijentSustava.izvrsiKlijentNaredbu();
                     break;
                 case "prikaz":
-                    PregledSustava pregledSustava = new PregledSustava(matcher);
-                    pregledSustava.izvrsiPregledNaredbu();                    
+                    PregledSustava pregledSustava = new PregledSustava(naredba);
+                    pregledSustava.izvrsiPregledNaredbu();
                     break;
             }
 
@@ -57,19 +49,17 @@ public class KorisnikSustava {
         }
     }
 
-    private static Matcher identificirajNaredbu(String korisnickaNaredba, ArrayList<String> listaNaredbi) {
-
-        for (String naredba : listaNaredbi) {
-            Pattern pattern = Pattern.compile(naredba);
-            Matcher matcher = pattern.matcher(korisnickaNaredba);
-            if (matcher.matches()) {
-                for (int i = 0; i <= matcher.groupCount(); i++) {
-                    System.out.println(i + ". " + matcher.group(i));
-                }
-                return matcher;
-            }
+    private static ArrayList<String> identificirajNaredbu(String korisnickaNaredba) {
+        Validator validator = new Validator();
+        
+        if (validator.stringValjan(korisnickaNaredba, Validator.ADMIN)) {
+            return validator.grupe(korisnickaNaredba, Validator.ADMIN);
+        } else if (validator.stringValjan(korisnickaNaredba, Validator.KORISNIK)) {
+            return validator.grupe(korisnickaNaredba, Validator.KORISNIK);
+        } else if (validator.stringValjan(korisnickaNaredba, Validator.PRIKAZ)) {
+            return validator.grupe(korisnickaNaredba, Validator.PRIKAZ);
         }
-
+        
         return null;
     }
 }

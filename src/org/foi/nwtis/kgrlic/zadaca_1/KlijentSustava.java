@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 /**
  *
@@ -14,18 +14,18 @@ import java.util.regex.Matcher;
  */
 public class KlijentSustava {
 
-    private final Matcher matcher;
+    private final ArrayList<String> naredba;
 
-    public KlijentSustava(Matcher matcher) {
-        this.matcher = matcher;
+    public KlijentSustava(ArrayList<String> naredba) {
+        this.naredba = naredba;
     }
 
     public void izvrsiKlijentNaredbu() {
-        String server = this.matcher.group(2);
-        int port = Integer.parseInt(this.matcher.group(3));
-        String korisnik = this.matcher.group(4);
-        String tip = this.matcher.group(5);
-        String vrijednost = this.matcher.group(6);
+        String server = this.naredba.get(2);
+        int port = Integer.parseInt(this.naredba.get(3));
+        String korisnik = this.naredba.get(4);
+        String tip = this.naredba.get(5);
+        String vrijednost = this.naredba.get(6);
 
         InputStream inputStream = null;
         OutputStream outputStream = null;

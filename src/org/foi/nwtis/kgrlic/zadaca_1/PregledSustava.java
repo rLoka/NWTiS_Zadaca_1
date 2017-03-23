@@ -1,5 +1,6 @@
 package org.foi.nwtis.kgrlic.zadaca_1;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 
 /**
@@ -8,14 +9,14 @@ import java.util.regex.Matcher;
  */
 public class PregledSustava {
     
-    private final Matcher matcher;
+    private final ArrayList<String> naredba;
 
-    public PregledSustava(Matcher matcher) {
-        this.matcher = matcher;
+    public PregledSustava(ArrayList<String> naredba) {
+        this.naredba = naredba;
     }
     
     public void izvrsiPregledNaredbu(){
-        String datoteka = this.matcher.group(2);
+        String datoteka = this.naredba.get(2);
         System.out.println("Pregled: " + datoteka);
     }
     

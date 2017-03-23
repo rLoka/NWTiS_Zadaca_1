@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 /**
  *
@@ -14,18 +14,18 @@ import java.util.regex.Matcher;
  */
 public class AdministratorSustava {
     
-    private final Matcher matcher;
+    private final ArrayList<String> naredba;
 
-    public AdministratorSustava(Matcher matcher) {
-        this.matcher = matcher;
+    public AdministratorSustava(ArrayList<String> naredba) {
+        this.naredba = naredba;
     }
     
     public void izvrsiAdminNaredbu() {
-        String server = this.matcher.group(2);
-        int port = Integer.parseInt(this.matcher.group(3));
-        String korisnik = this.matcher.group(4);
-        String lozinka = this.matcher.group(5);
-        String naredba = this.matcher.group(6);
+        String server = this.naredba.get(2);
+        int port = Integer.parseInt(this.naredba.get(3));
+        String korisnik = this.naredba.get(4);
+        String lozinka = this.naredba.get(5);
+        String komanda = this.naredba.get(6);
 
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -36,7 +36,7 @@ public class AdministratorSustava {
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
 
-            String zahtjev = "USER " + korisnik + "; PASSWD " + lozinka + "; " + naredba.toUpperCase() + ";";
+            String zahtjev = "USER " + korisnik + "; PASSWD " + lozinka + "; " + komanda.toUpperCase() + ";";
             outputStream.write(zahtjev.getBytes());
             outputStream.flush();
             socket.shutdownOutput();
