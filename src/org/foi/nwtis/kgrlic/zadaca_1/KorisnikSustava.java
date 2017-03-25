@@ -11,7 +11,7 @@ import java.util.ArrayList;
  *
  * @author kgrlic
  */
-public class KorisnikSustava {
+public class KorisnikSustava {    
 
     /**
      * @param args the command line arguments
@@ -23,7 +23,7 @@ public class KorisnikSustava {
             stringBuilder.append(arg).append(" ");
         }
 
-        ArrayList<String> naredba = KorisnikSustava.identificirajNaredbu(stringBuilder.toString().trim());
+        ArrayList<String> naredba = KorisnikSustava.provjeriNaredbu(stringBuilder.toString().trim());
 
         if (naredba != null) {
 
@@ -49,8 +49,9 @@ public class KorisnikSustava {
         }
     }
 
-    private static ArrayList<String> identificirajNaredbu(String korisnickaNaredba) {
-        Validator validator = new Validator();
+    private static ArrayList<String> provjeriNaredbu(String korisnickaNaredba) {
+        
+        Validator validator = new Validator();     
         
         if (validator.stringValjan(korisnickaNaredba, Validator.ADMIN)) {
             return validator.grupe(korisnickaNaredba, Validator.ADMIN);

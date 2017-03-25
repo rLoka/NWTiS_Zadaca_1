@@ -13,19 +13,24 @@ import java.util.logging.Logger;
  * @author rloka
  */
 public class AdministratorSustava {
-    
+
     private final ArrayList<String> naredba;
 
     public AdministratorSustava(ArrayList<String> naredba) {
         this.naredba = naredba;
     }
-    
+
     public void izvrsiAdminNaredbu() {
         String server = this.naredba.get(2);
         int port = Integer.parseInt(this.naredba.get(3));
         String korisnik = this.naredba.get(4);
         String lozinka = this.naredba.get(5);
         String komanda = this.naredba.get(6);
+
+        if (this.provjeraParametara(server, port, korisnik, lozinka)) {
+            System.out.println("Proslijeđeni parametri ne odgovaraju! Gasim program ...");
+            return;
+        }
 
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -66,5 +71,32 @@ public class AdministratorSustava {
             }
         }
     }
-    
+
+    private boolean provjeraParametara(String server, int port, String korisnik, String lozinka) {
+
+        Validator validator = new Validator();
+
+        boolean provjeraIpAdrese = validator.stringValjan(server, Validator.IPADRESA);
+        boolean provjeraNazivaPosluzitelja = validator.stringValjan(server, Validator.POSLUZITELJ);
+        boolean provjeraRasponaPorta = validator.rasponValjan(port, Validator.PORT);
+        boolean provjeraKorisnickogImena = validator.stringValjan(korisnik, Validator.KORISNICKO_IME);
+        boolean provjeraLozinke = validator.stringValjan(lozinka, Validator.LOZINKA);
+
+        if (!provjeraIpAdrese && !provjeraNazivaPosluzitelja) {
+            System.out.println("IP adresa/poslužitelj nisu u valjani!");
+            return false;
+        } else if (!provjeraRasponaPorta) {
+            System.out.println("Port nije valjan!");
+            return false;
+        } else if (!provjeraKorisnickogImena) {
+            System.out.println("Korisničko ime nije u zadanom formatu!");
+            return false;
+        } else if (!provjeraLozinke) {
+            System.out.println("Lozinka zadanom formatu!");
+            return false;
+        }
+
+        return true;
+    }
+
 }

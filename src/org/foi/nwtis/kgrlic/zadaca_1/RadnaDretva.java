@@ -7,8 +7,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -21,7 +19,6 @@ public class RadnaDretva extends Thread {
     private OutputStream outputStream;
 
     private final ArrayList<RadnaDretva> listaAktivnihRadnihDretvi;
-    private final ArrayList<String> listaNaredbi;
     private final long vrijemePocetka;
     private final ServerRuntimeKonfiguracija serverRuntimeKonfiguracija;
 
@@ -33,12 +30,6 @@ public class RadnaDretva extends Thread {
 
         this.socket = socket;
         this.listaAktivnihRadnihDretvi = listaAktivnihRadnihDretvi;
-        this.listaNaredbi = new ArrayList<>();
-
-        this.listaNaredbi.add("^USER ([^\\s]+); (PASSWD) ([^\\s]+); (PAUSE|STOP|START|STAT);$");
-        this.listaNaredbi.add("^USER ([^\\s]+); (ADD) ([^\\s]+);$");
-        this.listaNaredbi.add("^USER ([^\\s]+); (TEST) ([^\\s]+);$");
-        this.listaNaredbi.add("^USER ([^\\s]+); (WAIT) ([^\\s]+);$");
 
         this.serverRuntimeKonfiguracija = ServerRuntimeKonfiguracija.getInstance();
 
@@ -56,7 +47,7 @@ public class RadnaDretva extends Thread {
     @Override
     public void run() {
         try {
-
+            Thread.sleep(100);
             System.out.println(this.getClass()); //TODO obrisati dretvu iz kolekcije aktivnih radnih dretvi
             //TODO smanjiti brojač aktivnih radnih dretvi
             //TODO ažurirati evidenciju rada
@@ -76,28 +67,27 @@ public class RadnaDretva extends Thread {
                 }
 
                 System.out.println("Primljena naredba: " + stringBuffer);
+                
+                ArrayList<String> naredba = this.identificirajNaredbu(stringBuffer);
 
-                Matcher zaprimljeneNaredbe = this.identificirajNaredbu(stringBuffer);
-
-                if (zaprimljeneNaredbe == null) {
+                if (naredba == null) {
                     this.outputStream.write("ERROR 90; Nevaljana naredba.".getBytes());
                 }
-
-                if ("PASSWD".equals(zaprimljeneNaredbe.group(2))) {
-                    this.izvrsiAdminNaredbu(zaprimljeneNaredbe);
+                else if ("PASSWD".equals(naredba.get(2))) {
+                    this.izvrsiAdminNaredbu(naredba);
                 } else {
                     if ("PAUSED".equals(this.serverRuntimeKonfiguracija.getStatus())) {
                         this.outputStream.write("ERROR 01; Server je pauziran!".getBytes());
                     } else {
-                        switch (zaprimljeneNaredbe.group(2)) {
+                        switch (naredba.get(2)) {
                             case "ADD":
-                                this.izvrsiKlijentAddNaredbu(zaprimljeneNaredbe);
+                                this.izvrsiKlijentAddNaredbu(naredba);
                                 break;
                             case "TEST":
-                                this.izvrsiKlijentTestNaredbu(zaprimljeneNaredbe);
+                                this.izvrsiKlijentTestNaredbu(naredba);
                                 break;
                             case "WAIT":
-                                this.izvrsiKlijentWaitNaredbu(zaprimljeneNaredbe);
+                                this.izvrsiKlijentWaitNaredbu(naredba);
                                 break;
                         }
                     }
@@ -136,22 +126,26 @@ public class RadnaDretva extends Thread {
         super.start();
     }
 
-    private Matcher identificirajNaredbu(StringBuffer korisnickaNaredba) {
+    private ArrayList<String> identificirajNaredbu(StringBuffer korisnickaNaredba) {
 
-        for (String naredba : this.listaNaredbi) {
-            Pattern pattern = Pattern.compile(naredba);
-            Matcher matcher = pattern.matcher(korisnickaNaredba);
-
-            if (matcher.matches()) {
-                return matcher;
-            }
+         Validator validator = new Validator();
+        
+        if (validator.stringValjan(korisnickaNaredba, Validator.PASSWD)) {
+            return validator.grupe(korisnickaNaredba, Validator.PASSWD);
+        } else if (validator.stringValjan(korisnickaNaredba, Validator.ADD)) {
+            return validator.grupe(korisnickaNaredba, Validator.ADD);
+        } else if (validator.stringValjan(korisnickaNaredba, Validator.TEST)) {
+            return validator.grupe(korisnickaNaredba, Validator.TEST);
+        } else if (validator.stringValjan(korisnickaNaredba, Validator.WAIT)) {
+            return validator.grupe(korisnickaNaredba, Validator.WAIT);
         }
-
+        
         return null;
+
     }
 
-    private void izvrsiAdminNaredbu(Matcher zaprimljeneNaredbe) throws IOException, InterruptedException {
-        switch (zaprimljeneNaredbe.group(4)) {
+    private void izvrsiAdminNaredbu(ArrayList<String> naredba) throws IOException, InterruptedException {
+        switch (naredba.get(4)) {
             case "PAUSE":
                 this.pauzirajServer();
                 break;
@@ -206,15 +200,15 @@ public class RadnaDretva extends Thread {
         System.exit(0);
     }
 
-    private void izvrsiKlijentAddNaredbu(Matcher matcher) throws IOException {
+    private void izvrsiKlijentAddNaredbu(ArrayList<String> naredba) throws IOException {
         outputStream.write("OK; ADD".getBytes());
     }
 
-    private void izvrsiKlijentTestNaredbu(Matcher matcher) throws IOException {
+    private void izvrsiKlijentTestNaredbu(ArrayList<String> naredba) throws IOException {
         outputStream.write("OK; TEST".getBytes());
     }
 
-    private void izvrsiKlijentWaitNaredbu(Matcher matcher) throws IOException {
+    private void izvrsiKlijentWaitNaredbu(ArrayList<String> naredba) throws IOException {
         outputStream.write("OK; WAIT".getBytes());
     }
 

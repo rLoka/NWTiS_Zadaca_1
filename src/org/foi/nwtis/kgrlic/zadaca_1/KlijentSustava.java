@@ -27,6 +27,11 @@ public class KlijentSustava {
         String tip = this.naredba.get(5);
         String vrijednost = this.naredba.get(6);
 
+        if (this.provjeraParametara(server, port, korisnik, vrijednost)) {
+            System.out.println("Proslijeđeni parametri ne odgovaraju! Gasim program ...");
+            return;
+        }
+
         InputStream inputStream = null;
         OutputStream outputStream = null;
         Socket socket = null;
@@ -35,10 +40,10 @@ public class KlijentSustava {
             socket = new Socket(server, port);
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
-            
+
             String zahtjev = "USER " + korisnik + "; ";
-            
-            switch(tip){
+
+            switch (tip) {
                 case "a":
                     zahtjev += "ADD " + vrijednost + ";";
                     break;
@@ -78,6 +83,34 @@ public class KlijentSustava {
                 Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    private boolean provjeraParametara(String server, int port, String korisnik, String vrijednost) {
+
+        Validator validator = new Validator();
+
+        boolean provjeraIpAdrese = validator.stringValjan(server, Validator.IPADRESA);
+        boolean provjeraNazivaPosluzitelja = validator.stringValjan(server, Validator.POSLUZITELJ);
+        boolean provjeraRasponaPorta = validator.rasponValjan(port, Validator.PORT);
+        boolean provjeraKorisnickogImena = validator.stringValjan(korisnik, Validator.KORISNICKO_IME);
+        boolean provjeraUrla = validator.stringValjan(vrijednost, Validator.URL);
+        boolean provjeraNnn = validator.rasponValjan(vrijednost, Validator.NNN);
+
+        if (!provjeraIpAdrese && !provjeraNazivaPosluzitelja) {
+            System.out.println("IP adresa/poslužitelj nisu u valjani!");
+            return false;
+        } else if (!provjeraRasponaPorta) {
+            System.out.println("Port nije valjan!");
+            return false;
+        } else if (!provjeraKorisnickogImena) {
+            System.out.println("Korisničko ime nije u zadanom formatu!");
+            return false;
+        } else if (!provjeraUrla && !provjeraNnn) {
+            System.out.println("Url/Broj sekundi nije zadanom formatu!");
+            return false;
+        }
+
+        return true;
     }
 
 }

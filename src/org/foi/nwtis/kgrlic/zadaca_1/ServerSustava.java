@@ -26,9 +26,11 @@ public class ServerSustava {
      * Glavna metoda klase ServerSustava - pokreće server.
      *
      * @param args argumenti pri pozivu programa u obliku niza stringova
+     * @throws org.foi.nwtis.kgrlic.konfiguracije.NemaKonfiguracije
+     * @throws org.foi.nwtis.kgrlic.konfiguracije.NeispravnaKonfiguracija
      */
-    public static void main(String[] args) {
-        
+    public static void main(String[] args) throws NemaKonfiguracije, NeispravnaKonfiguracija, IOException {
+
         StringBuilder stringBuilder = new StringBuilder();
         Validator validator = new Validator();
 
@@ -39,13 +41,15 @@ public class ServerSustava {
         String ulazniString = stringBuilder.toString().trim();
 
         if (validator.stringValjan(ulazniString, Validator.SERVER)) {
-            
+
             ArrayList<String> argumenti = validator.grupe(ulazniString, Validator.SERVER);
-      
+
             String nazivDatoteke = argumenti.get(1) + argumenti.get(2);
             boolean trebaUcitatiEvidenciju = false;
             if (argumenti.size() > 3) {
-                trebaUcitatiEvidenciju = true;
+                if ("-load".equals(argumenti.get(3).replaceAll("\\s+", ""))) {
+                    trebaUcitatiEvidenciju = true;
+                }
             }
 
             ServerSustava server = new ServerSustava();
@@ -56,13 +60,32 @@ public class ServerSustava {
         }
     }
 
-    private void pokreniServer(String nazivDatoteke, boolean trebaUcitatiEvidenciju) {
-        //TODO kreirati kolekciju u kojoj će serijalizatorEvidencije spremati aktivne dretve
+    private void pokreniServer(String nazivDatoteke, boolean trebaUcitatiEvidenciju) throws NemaKonfiguracije, NeispravnaKonfiguracija, IOException {
+       
         ArrayList<RadnaDretva> listaAktivnihRadnihDretvi = listaAktivnihRadnihDretvi = new ArrayList<>();
         ServerRuntimeKonfiguracija serverRuntimeKonfiguracija = ServerRuntimeKonfiguracija.getInstance();
+        Konfiguracija konfiguracija = KonfiguracijaApstraktna.preuzmiKonfiguraciju(nazivDatoteke);
+
+        Validator validator = new Validator();
+
+        if (trebaUcitatiEvidenciju) {
+            String evidencijskaDatoteka = konfiguracija.dajPostavku("evidDatoteka");
+
+            if (evidencijskaDatoteka.length() == 0 || evidencijskaDatoteka == null) {
+                System.out.println("Evidencijska datoteka nije definirana.");
+            } else {
+                boolean datotekaNaDiskuPostoji = validator.datotekaNaDiskuPostoji(evidencijskaDatoteka);
+                if (datotekaNaDiskuPostoji) {
+                    EvidencijaLoader evidencijaLoader = new EvidencijaLoader();
+                    Evidencija.setInstance(evidencijaLoader.ucitajEvidencijuSaDiska(evidencijskaDatoteka));
+                }
+                else{
+                    System.out.println("Evidencijska datoteka ne postoji.");
+                }
+            }
+        }
 
         try {
-            Konfiguracija konfiguracija = KonfiguracijaApstraktna.preuzmiKonfiguraciju(nazivDatoteke);
 
             int port = Integer.parseInt(konfiguracija.dajPostavku("port"));
             int maksBrojRadnihDretvi = Integer.parseInt(konfiguracija.dajPostavku("maksBrojRadnihDretvi"));
@@ -96,7 +119,7 @@ public class ServerSustava {
                 }
             }
 
-        } catch (NemaKonfiguracije | NeispravnaKonfiguracija | IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(ServerSustava.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Neispravna ili nepostojeća konfiguracijska datoteka! Gasim server ...");
         }

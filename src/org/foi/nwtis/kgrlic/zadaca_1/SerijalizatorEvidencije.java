@@ -5,8 +5,6 @@
  */
 package org.foi.nwtis.kgrlic.zadaca_1;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.foi.nwtis.kgrlic.konfiguracije.Konfiguracija;
 
 /**

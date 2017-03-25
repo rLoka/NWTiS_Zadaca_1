@@ -48,7 +48,7 @@ public class NadzorDretvi extends Thread {
             long vrijemeZavrsetka = System.currentTimeMillis();
 
             try {
-                sleep(Math.abs(this.intervalNadzorneDretve - (vrijemeZavrsetka - trenutnoVrijeme)));
+                Thread.sleep(Math.abs(this.intervalNadzorneDretve - (vrijemeZavrsetka - trenutnoVrijeme)));
             } catch (InterruptedException ex) {
                 Logger.getLogger(NadzorDretvi.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -37,7 +37,7 @@ public class ProvjeraAdresa extends Thread{
             long vrijemeZavrsetka = System.currentTimeMillis();
             
             try {
-                sleep(trajanjeSpavanja- (vrijemeZavrsetka - trenutnoVrijeme));
+                Thread.sleep(trajanjeSpavanja- (vrijemeZavrsetka - trenutnoVrijeme));
             } catch (InterruptedException ex) {
                 Logger.getLogger(ProvjeraAdresa.class.getName()).log(Level.SEVERE, null, ex);
             }
