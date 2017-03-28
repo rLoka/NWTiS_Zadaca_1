@@ -16,6 +16,7 @@ import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
@@ -27,6 +28,13 @@ import java.util.logging.Logger;
  */
 public class EvidencijaLoader {
     
+    /**
+     * Sprema evidenciju na disk
+     * @param evidencija
+     * @param datoteka
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     public void spremiEvidenciju(Evidencija evidencija, String datoteka) throws FileNotFoundException, IOException{
         FileOutputStream fileOutputStream = new FileOutputStream(datoteka);
         try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
@@ -35,6 +43,11 @@ public class EvidencijaLoader {
         }
     }
     
+    /**
+     * Učitava evidenciju sa diska
+     * @param datoteka
+     * @return
+     */
     public Evidencija ucitajEvidencijuSaDiska(String datoteka) {
         File file = new File(datoteka);
         
@@ -48,7 +61,25 @@ public class EvidencijaLoader {
         
         return null;
     }
+    
+    /**
+     * Učitava evidenciju sa diska u niz byteva
+     * @param datoteka
+     * @return
+     * @throws IOException
+     */
+    public byte[] ucitajEvidencijuSaDiskaBytes(String datoteka) throws IOException{
+        Path path = Paths.get(datoteka);
+        return Files.readAllBytes(path);
+    }
 
+    /**
+     * Učitava evidenciju sa servera
+     * @param datoteka
+     * @return
+     * @throws MalformedURLException
+     * @throws IOException
+     */
     public Evidencija ucitajEvidencijuSaServera(String datoteka) throws MalformedURLException, IOException {
         URL datotekaNaServeru = new URL(datoteka);
         String tempDatotekaNaDisku = "tmpEvidencija.bin";
@@ -64,8 +95,11 @@ public class EvidencijaLoader {
         return this.ucitajEvidencijuSaDiska(tempDatotekaNaDisku);
     }
     
-    public void ispisiEvidenciju(Evidencija evidencija) {
-        
+    /**
+     * Ispisuje podatke o evidenciji
+     * @param evidencija
+     */
+    public void ispisiEvidenciju(Evidencija evidencija) {        
         System.out.println("Broj prekinutih zahtjeva:  " + evidencija.brojPrekinutihZahtjeva);
         System.out.println("Broj uspješnih zahtjeva:  " + evidencija.brojUspjesnihZahtjeva);
         System.out.println("Ukupno zahtjeva:  " + evidencija.ukupnoZahtjeva);

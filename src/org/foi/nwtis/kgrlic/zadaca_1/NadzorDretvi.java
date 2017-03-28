@@ -21,6 +21,11 @@ public class NadzorDretvi extends Thread {
     private final long maksVrijemeRadneDretve;
     private final int intervalNadzorneDretve;
 
+    /**
+     *
+     * @param konfiguracija
+     * @param listaAktivnihRadnihDretvi
+     */
     public NadzorDretvi(Konfiguracija konfiguracija, ArrayList<RadnaDretva> listaAktivnihRadnihDretvi) {
         this.konfiguracija = konfiguracija;
         this.listaAktivnihRadnihDretvi = listaAktivnihRadnihDretvi;
@@ -42,9 +47,6 @@ public class NadzorDretvi extends Thread {
 
             this.provjeriRadneDretve();
 
-            //TODO dovršite sami
-            //TODO provjerite trajanje pojedine aktivne radne dretve iz kolekcije
-            //TODO obrisati dretvu iz kolekcije aktivnih radnih dretvi ako traje više nego što smije
             long vrijemeZavrsetka = System.currentTimeMillis();
 
             try {
@@ -53,7 +55,6 @@ public class NadzorDretvi extends Thread {
                 Logger.getLogger(NadzorDretvi.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            //TODO razmisliti kako izaći iz beskonačne petlje
         }
     }
 
@@ -62,6 +63,9 @@ public class NadzorDretvi extends Thread {
         super.start();
     }
 
+    /**
+     * Provjerava izvođenje radnih dretvi
+     */
     private void provjeriRadneDretve() {
         //Temp lista se koristi zbog java.util.ConcurrentModificationException
         ArrayList<RadnaDretva> listaDretviKojeTrebaPrekinuti = new ArrayList();

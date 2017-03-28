@@ -15,8 +15,9 @@ public class KorisnikSustava {
 
     /**
      * @param args the command line arguments
+     * @throws java.lang.ClassNotFoundException
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
 
         StringBuilder stringBuilder = new StringBuilder();
         for (String arg : args) {
@@ -49,6 +50,11 @@ public class KorisnikSustava {
         }
     }
 
+    /**
+     * Provjerava valjanost naredbe
+     * @param korisnickaNaredba
+     * @return 
+     */
     private static ArrayList<String> provjeriNaredbu(String korisnickaNaredba) {
         
         Validator validator = new Validator();     

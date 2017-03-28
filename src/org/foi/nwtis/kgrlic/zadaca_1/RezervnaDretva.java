@@ -22,6 +22,10 @@ public class RezervnaDretva extends Thread {
     Konfiguracija konfiguracija;
     Socket socket;
 
+    /**
+     *
+     * @param konfiguracija
+     */
     public RezervnaDretva(Konfiguracija konfiguracija) {
         this.konfiguracija = konfiguracija;
     }
@@ -59,6 +63,11 @@ public class RezervnaDretva extends Thread {
         super.start(); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * Obrađuje korisnika ako ima previše radnih dretvi
+     * @param socket
+     * @throws IOException
+     */
     public void obradiKorisnika(Socket socket) throws IOException {
         this.socket = socket;
         

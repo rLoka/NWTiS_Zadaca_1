@@ -3,13 +3,21 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/RadnaDretva.java</file>
             <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/Validator.java</file>
             <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/KorisnikSustava.java</file>
-            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/RezervnaDretva.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/ServerSustava.java</file>
             <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/KlijentSustava.java</file>
             <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/PregledSustava.java</file>
             <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/AdministratorSustava.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/NadzorDretvi.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/RadnaDretva.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/NWTiS_kgrlic_zadaca_1.txt</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/RezervnaDretva.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/EvidencijaLoader.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/ProvjeraAdresa.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/SerijalizatorEvidencije.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/ServerRuntimeKonfiguracija.java</file>
+            <file>file:/home/rloka/Desktop/Faks/NWTIS/kgrlic_zadaca_1/src/org/foi/nwtis/kgrlic/zadaca_1/Evidencija.java</file>
         </group>
     </open-files>
 </project-private>

@@ -1,5 +1,6 @@
 package org.foi.nwtis.kgrlic.zadaca_1;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,18 +17,26 @@ public class AdministratorSustava {
 
     private final ArrayList<String> naredba;
 
+    /**
+     *
+     * @param naredba
+     */
     public AdministratorSustava(ArrayList<String> naredba) {
         this.naredba = naredba;
     }
 
-    public void izvrsiAdminNaredbu() {
+    /**
+     * Izvršava naredbu korisnika koji se identificirao kao administrator
+     * @throws ClassNotFoundException
+     */
+    public void izvrsiAdminNaredbu() throws ClassNotFoundException {
         String server = this.naredba.get(2);
         int port = Integer.parseInt(this.naredba.get(3));
         String korisnik = this.naredba.get(4);
         String lozinka = this.naredba.get(5);
         String komanda = this.naredba.get(6);
 
-        if (this.provjeraParametara(server, port, korisnik, lozinka)) {
+        if (!this.provjeraParametara(server, port, korisnik, lozinka)) {
             System.out.println("Proslijeđeni parametri ne odgovaraju! Gasim program ...");
             return;
         }
@@ -54,7 +63,21 @@ public class AdministratorSustava {
                 }
                 stringBuilder.append((char) znak);
             }
-            System.out.println("Primljeni  odgovor: " + stringBuilder);
+
+            if ("STAT".equals(komanda.toUpperCase())) {
+                String odgovor[] = stringBuilder.toString().split("\r\n");
+                System.out.println("Primljeni  odgovor: " + odgovor[0]);
+                try (FileOutputStream fileOutputStream = new FileOutputStream("tmpPrimljenaEvidencija.bin")) {
+                    fileOutputStream.write(odgovor[1].getBytes());
+                }
+                EvidencijaLoader evidencijaLoader = new EvidencijaLoader();
+                Evidencija.setInstance(evidencijaLoader.ucitajEvidencijuSaDiska("tmpPrimljenaEvidencija.bin"));
+                evidencijaLoader.ispisiEvidenciju(Evidencija.getInstance());
+
+            } else {
+                System.out.println("Primljeni  odgovor: " + stringBuilder);
+            }
+
         } catch (IOException ex) {
             Logger.getLogger(RadnaDretva.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -72,6 +95,9 @@ public class AdministratorSustava {
         }
     }
 
+    /**
+     * Radi provjeru parametara
+     */
     private boolean provjeraParametara(String server, int port, String korisnik, String lozinka) {
 
         Validator validator = new Validator();

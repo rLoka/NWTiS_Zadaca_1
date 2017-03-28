@@ -17,6 +17,10 @@ public class ProvjeraAdresa extends Thread{
 
     Konfiguracija konfiguracija;
     
+    /**
+     *
+     * @param konfiguracija
+     */
     public ProvjeraAdresa(Konfiguracija konfiguracija) {
         this.konfiguracija = konfiguracija;
     }
@@ -41,10 +45,6 @@ public class ProvjeraAdresa extends Thread{
             } catch (InterruptedException ex) {
                 Logger.getLogger(ProvjeraAdresa.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            //TODO razmisliti kako izaći iz beskonačne petlje
-            
-            //TODO razmisliti kako izaći iz beskonačne petlje
         }
     }
 

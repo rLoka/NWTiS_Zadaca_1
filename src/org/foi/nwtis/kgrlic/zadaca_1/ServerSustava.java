@@ -28,6 +28,7 @@ public class ServerSustava {
      * @param args argumenti pri pozivu programa u obliku niza stringova
      * @throws org.foi.nwtis.kgrlic.konfiguracije.NemaKonfiguracije
      * @throws org.foi.nwtis.kgrlic.konfiguracije.NeispravnaKonfiguracija
+     * @throws java.io.IOException
      */
     public static void main(String[] args) throws NemaKonfiguracije, NeispravnaKonfiguracija, IOException {
 
@@ -60,6 +61,14 @@ public class ServerSustava {
         }
     }
 
+    /**
+     * Pokreće server
+     * @param nazivDatoteke
+     * @param trebaUcitatiEvidenciju
+     * @throws NemaKonfiguracije
+     * @throws NeispravnaKonfiguracija
+     * @throws IOException 
+     */
     private void pokreniServer(String nazivDatoteke, boolean trebaUcitatiEvidenciju) throws NemaKonfiguracije, NeispravnaKonfiguracija, IOException {
        
         ArrayList<RadnaDretva> listaAktivnihRadnihDretvi = listaAktivnihRadnihDretvi = new ArrayList<>();
@@ -77,6 +86,7 @@ public class ServerSustava {
                 boolean datotekaNaDiskuPostoji = validator.datotekaNaDiskuPostoji(evidencijskaDatoteka);
                 if (datotekaNaDiskuPostoji) {
                     EvidencijaLoader evidencijaLoader = new EvidencijaLoader();
+                    evidencijaLoader.spremiEvidenciju(Evidencija.getInstance(), evidencijskaDatoteka);
                     Evidencija.setInstance(evidencijaLoader.ucitajEvidencijuSaDiska(evidencijskaDatoteka));
                 }
                 else{
@@ -113,7 +123,7 @@ public class ServerSustava {
                     rezervnaDretva.obradiKorisnika(socket);
                 } else {
                     redniBrojDretve++;
-                    RadnaDretva radnaDretva = new RadnaDretva(socket, listaAktivnihRadnihDretvi, redniBrojDretve);
+                    RadnaDretva radnaDretva = new RadnaDretva(socket, listaAktivnihRadnihDretvi, redniBrojDretve, konfiguracija);
                     listaAktivnihRadnihDretvi.add(radnaDretva);
                     radnaDretva.start();
                 }

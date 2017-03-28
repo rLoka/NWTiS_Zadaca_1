@@ -15,6 +15,10 @@ public class SerijalizatorEvidencije extends Thread{
 
     Konfiguracija konf;
     
+    /**
+     *
+     * @param konf
+     */
     public SerijalizatorEvidencije(Konfiguracija konf) {
         this.konf = konf;
     }

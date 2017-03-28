@@ -11,10 +11,17 @@ public class PregledSustava {
     private final ArrayList<String> naredba;
     private Evidencija evidencija;
 
+    /**
+     *
+     * @param naredba
+     */
     public PregledSustava(ArrayList<String> naredba) {
         this.naredba = naredba;
     }
 
+    /**
+     *
+     */
     public void izvrsiPregledNaredbu() {
         String datoteka = this.naredba.get(2);
 

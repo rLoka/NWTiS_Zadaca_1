@@ -16,10 +16,17 @@ public class KlijentSustava {
 
     private final ArrayList<String> naredba;
 
+    /**
+     *
+     * @param naredba
+     */
     public KlijentSustava(ArrayList<String> naredba) {
         this.naredba = naredba;
     }
 
+    /**
+     * Izvršava klijentsku naredbu
+     */
     public void izvrsiKlijentNaredbu() {
         String server = this.naredba.get(2);
         int port = Integer.parseInt(this.naredba.get(3));
@@ -27,7 +34,7 @@ public class KlijentSustava {
         String tip = this.naredba.get(5);
         String vrijednost = this.naredba.get(6);
 
-        if (this.provjeraParametara(server, port, korisnik, vrijednost)) {
+        if (!this.provjeraParametara(server, port, korisnik, vrijednost)) {
             System.out.println("Proslijeđeni parametri ne odgovaraju! Gasim program ...");
             return;
         }
@@ -85,6 +92,9 @@ public class KlijentSustava {
         }
     }
 
+     /**
+     * Provjerava ispravnost parametara
+     */
     private boolean provjeraParametara(String server, int port, String korisnik, String vrijednost) {
 
         Validator validator = new Validator();
@@ -94,7 +104,11 @@ public class KlijentSustava {
         boolean provjeraRasponaPorta = validator.rasponValjan(port, Validator.PORT);
         boolean provjeraKorisnickogImena = validator.stringValjan(korisnik, Validator.KORISNICKO_IME);
         boolean provjeraUrla = validator.stringValjan(vrijednost, Validator.URL);
-        boolean provjeraNnn = validator.rasponValjan(vrijednost, Validator.NNN);
+        
+        boolean provjeraNnn = false;        
+        if(!provjeraUrla && vrijednost.length() <= 3){
+            provjeraNnn = validator.rasponValjan(vrijednost, Validator.NNN);
+        }       
 
         if (!provjeraIpAdrese && !provjeraNazivaPosluzitelja) {
             System.out.println("IP adresa/poslužitelj nisu u valjani!");
